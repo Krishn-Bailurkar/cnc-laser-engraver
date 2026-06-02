@@ -1,0 +1,19 @@
+# System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor and Tooling
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Temp/Cache
+*.log
+*.tmp
+*.bak
+*~
