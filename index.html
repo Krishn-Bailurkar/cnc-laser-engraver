@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive visual dashboard, dimension calculator, STL part explorer, and G-code laser simulator for the open-source CNC Laser Engraver Capstone Project.">
+    <title>CNC Laser Engraver - Interactive Project Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Premium Navigation Header -->
+    <header id="mainHeader">
+        <div class="header-container">
+            <a href="#" class="logo" id="logoLink">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">CNC Laser Engraver</span>
+            </a>
+            <ul class="nav-links" id="navLinksList">
+                <li><a href="#simulator" class="active-nav" id="navLinkSim">G-Code Simulator</a></li>
+                <li><a href="#calculator" id="navLinkCalc">BOM Calculator</a></li>
+                <li><a href="#parts" id="navLinkParts">STL Explorer</a></li>
+                <li><a href="#assembly" id="navLinkAssembly">Assembly Assistant</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Glowing Dashboard Hero Section -->
+    <section class="hero-section" id="heroDashboard">
+        <div class="hero-text" id="heroTextContainer">
+            <h1>Interactive Assembly & <br><span>G-Code Simulator</span></h1>
+            <p>Welcome to the digital twin of the CNC Laser Engraver Capstone Project. Design custom dimensions, visualize exact pipe cuts, explore 3D printable parts, and test real-time G-code engraving directly in your browser.</p>
+            <div class="cta-group" id="heroCtaGroup">
+                <button class="btn-primary" onclick="document.getElementById('simulator').scrollIntoView({behavior: 'smooth'})" id="btnHeroSim">
+                    <span>▶</span> Run Simulator
+                </button>
+                <button class="btn-secondary" onclick="document.getElementById('calculator').scrollIntoView({behavior: 'smooth'})" id="btnHeroCalc">
+                    📏 Calculate Custom Cuts
+                </button>
+            </div>
+        </div>
+        
+        <!-- Live Stats Panel -->
+        <div class="glass-card hero-widget" id="heroWidgetStats">
+            <div class="stat-item" id="statItemWorkspace">
+                <div class="stat-icon">📐</div>
+                <div class="stat-value">700×700</div>
+                <div class="stat-label">Workspace (mm)</div>
+            </div>
+            <div class="stat-item" id="statItemLaser">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-value">5.5W</div>
+                <div class="stat-label">Laser Diode</div>
+            </div>
+            <div class="stat-item" id="statItemStepper">
+                <div class="stat-icon">⚙️</div>
+                <div class="stat-value">NEMA 17</div>
+                <div class="stat-label">Stepper Motor</div>
+            </div>
+            <div class="stat-item" id="statItemFirmware">
+                <div class="stat-icon">🔌</div>
+                <div class="stat-value">GRBL 1.1</div>
+                <div class="stat-label">AVR Firmware</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main id="mainDashboard">
+
+        <!-- 1. G-Code Console & Bed Simulator -->
+        <section id="simulator" style="scroll-margin-top: 100px; margin-bottom: 5rem;">
+            <div class="section-header">
+                <h2>G-Code Canvas & Bed Simulator</h2>
+            </div>
+            <p class="section-subtitle">Type raw GRBL G-code or choose preset engraving macros to watch the virtual stepper motors and laser execute the pattern. <strong>Click Run to play buzzing audio synth effects!</strong></p>
+            
+            <div class="glass-card simulator-layout" id="simLayoutCard">
+                <!-- Canvas visualizer -->
+                <div class="canvas-container" id="canvasFrame">
+                    <div class="canvas-overlay" id="canvasHudOverlay">
+                        X: <span id="hudX">0.0</span> mm<br>
+                        Y: <span id="hudY">0.0</span> mm<br>
+                        Laser: <span id="hudLaser">OFF</span><br>
+                        Status: <span id="hudStatus">IDLE</span>
+                    </div>
+                    <canvas id="laserCanvas" width="700" height="700"></canvas>
+                    <div class="canvas-crosshair" id="canvasCrosshair"></div>
+                </div>
+                
+                <!-- Controls & Console -->
+                <div class="control-panel" id="simControlPanel">
+                    <div class="machine-hud" id="machineHudPanel">
+                        <div class="hud-item" id="hudItemSpeed">
+                            <div class="hud-label">Current Feedrate</div>
+                            <div class="hud-value">F1500</div>
+                        </div>
+                        <div class="hud-item" id="hudItemAcc">
+                            <div class="hud-label">MCU Connection</div>
+                            <div class="hud-value" style="color: var(--success)">115200bps</div>
+                        </div>
+                        <div class="hud-item" id="hudItemVoltage">
+                            <div class="hud-label">Driver Voltage</div>
+                            <div class="hud-value">12.0V</div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-section" id="panelSectionPresets">
+                        <h4>📋 Engraving Preset Macros</h4>
+                        <div class="preset-grid" id="presetGridBlock">
+                            <button class="btn-preset" data-preset="ducati" id="btnPresetDucati">🛡️ Ducati Shield</button>
+                            <button class="btn-preset" data-preset="circle" id="btnPresetCircle">⭕ Circle Cut</button>
+                            <button class="btn-preset" data-preset="star" id="btnPresetStar">⭐ Star Engrave</button>
+                            <button class="btn-preset" data-preset="grid" id="btnPresetGrid">🏁 Grid Hatching</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section" id="panelSectionConsole">
+                        <h4>💻 G-Code Console Terminal</h4>
+                        <div class="console-terminal" id="terminalLog">
+                            <div class="terminal-line line-output"><span>&gt;</span><span>Welcome to GRBL v1.1. Type command or click Preset to begin...</span></div>
+                            <div class="terminal-line line-output"><span>&gt;</span><span>Use G0 for rapid, G1 for laser cut, M3 S255 for max power.</span></div>
+                        </div>
+                        <div class="console-input-container" id="terminalInputBlock">
+                            <textarea id="gcodeInput" style="flex: 1; background: #02040a; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.6rem; color: var(--text-main); font-family: var(--font-mono); font-size: 0.85rem; height: 75px; resize: none;" placeholder="Type G-code here... (e.g. G0 X100 Y100)"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;" id="consoleActions">
+                            <button class="btn-primary" id="btnRunGcode" style="flex: 1; padding: 0.6rem 1.2rem; font-size: 0.85rem;">⚡ Run G-Code Stream</button>
+                            <button class="btn-secondary" id="btnClearCanvas" style="padding: 0.6rem 1.2rem; font-size: 0.85rem;">🗑️ Clear Bed</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Dimensions & Tube Cut Calculator -->
+        <section id="calculator" style="scroll-margin-top: 100px; margin-bottom: 5rem;">
+            <div class="section-header">
+                <h2>BOM & Steel Tube Cut Calculator</h2>
+            </div>
+            <p class="section-subtitle">Drag sliders to customize the active engraving area. The mechatronic cut engine dynamically calculates required steel pipe sizes, leadscrews, belt links, and dynamic cost estimates.</p>
+            
+            <div class="glass-card calculator-layout" id="calcLayoutCard">
+                <!-- Sliders -->
+                <div class="calculator-inputs" id="calcInputsContainer">
+                    <div class="input-group" id="inputGroupX">
+                        <label for="slideX">X-Axis Workspace Length <span>(mm)</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="slideX" min="200" max="1500" value="700">
+                            <input type="text" class="slider-val" id="slideXVal" value="700" readonly>
+                        </div>
+                    </div>
+                    <div class="input-group" id="inputGroupY">
+                        <label for="slideY">Y-Axis Workspace Width <span>(mm)</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="slideY" min="200" max="1500" value="700">
+                            <input type="text" class="slider-val" id="slideYVal" value="700" readonly>
+                        </div>
+                    </div>
+                    <div class="input-group" id="inputGroupZ">
+                        <label for="slideZ">Z-Axis Workspace Height <span>(mm)</span></label>
+                        <div class="slider-container">
+                            <input type="range" id="slideZ" min="20" max="300" value="50">
+                            <input type="text" class="slider-val" id="slideZVal" value="50" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="gfm-alert gfm-alert-note" id="calcDisclaimerAlert">
+                        <strong>📌 Custom Cut Rules:</strong> Pipes longer than 1000mm (1 Meter) require intermediate mid-span supports to maintain proper rigidity during high-speed laser passes.
+                    </div>
+                </div>
+                
+                <!-- Dynamic Results -->
+                <div class="calculator-results" id="calcResultsContainer">
+                    <div class="total-summary-card" id="calcSummaryCard">
+                        <div class="summary-block" id="sumBlockTubes">
+                            <h5>Linear Steel Pipes</h5>
+                            <p id="summaryTotalTube">0.00 m</p>
+                        </div>
+                        <div class="summary-block" id="sumBlockBelts">
+                            <h5>GT2 Belts Needed</h5>
+                            <p id="summaryTotalBelts">0.00 m</p>
+                        </div>
+                        <div class="summary-block" id="sumBlockCost">
+                            <h5>Estimated BOM Cost</h5>
+                            <p id="summaryEstimatedCost">₹0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="results-table-container" id="calcTableOuterFrame">
+                        <table class="results-table" id="calcTableDetails">
+                            <thead>
+                                <tr>
+                                    <th>Part Category</th>
+                                    <th>Component Description</th>
+                                    <th>Qty</th>
+                                    <th>Required Length</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>📐 Table Base</td>
+                                    <td>Outer Table Size (X × Y edges of feet)</td>
+                                    <td>1</td>
+                                    <td><span class="value-highlight" id="tableSizeX">970</span> × <span class="value-highlight" id="tableSizeY">979</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🔩 Steel Tubes</td>
+                                    <td>Outer X-axis frame side rails</td>
+                                    <td>2</td>
+                                    <td><span class="value-highlight" id="outerXLen">1004</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🔩 Steel Tubes</td>
+                                    <td>Gantry cross X-axis carriage pipe</td>
+                                    <td>1</td>
+                                    <td><span class="value-highlight" id="gantryXLen">949</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🔩 Steel Tubes</td>
+                                    <td>Outer Y-axis frame side rails</td>
+                                    <td>2</td>
+                                    <td><span class="value-highlight" id="outerYLen">1013</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🔩 Steel Tubes</td>
+                                    <td>Gantry cross Y-axis carriage pipe</td>
+                                    <td>1</td>
+                                    <td><span class="value-highlight" id="gantryYLen">958</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🔩 Steel Tubes</td>
+                                    <td>Z-axis vertical slide rails</td>
+                                    <td>2</td>
+                                    <td><span class="value-highlight" id="zRailsLen">340</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🔩 Steel Tubes</td>
+                                    <td>Vertical base leg pipes</td>
+                                    <td>4</td>
+                                    <td><span class="value-highlight" id="legsLen">129</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🔧 Leadscrew</td>
+                                    <td>T8 leadscrew height for vertical lift</td>
+                                    <td>1</td>
+                                    <td><span class="value-highlight" id="leadscrewLen">200</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🎗️ Belts</td>
+                                    <td>GT2 timing belt along X gantry</td>
+                                    <td>2</td>
+                                    <td><span class="value-highlight" id="beltXLen">1054</span> mm</td>
+                                </tr>
+                                <tr>
+                                    <td>🎗️ Belts</td>
+                                    <td>GT2 timing belt along Y gantry</td>
+                                    <td>2</td>
+                                    <td><span class="value-highlight" id="beltYLen">1063</span> mm</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. STL 3D Parts Visual Explorer -->
+        <section id="parts" style="scroll-margin-top: 100px; margin-bottom: 5rem;">
+            <div class="section-header">
+                <h2>STL Part Library & Print Explorer</h2>
+            </div>
+            <p class="section-subtitle">Hover over and click any 3D model block to inspect recommended 3D print specs (infill, material weight, quantity) and structural hardware fasteners required for assembly.</p>
+            
+            <div class="parts-grid" id="partsGridBlockContainer">
+                <div class="part-card" data-part-id="core" id="partCardCore">
+                    <div class="part-header">
+                        <div class="part-title">Core Carriage Block</div>
+                        <div class="part-tag tag-tool">Core</div>
+                    </div>
+                    <div class="part-view-box">
+                        <canvas data-part="core"></canvas>
+                    </div>
+                    <div class="part-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Infill %</span>
+                            <span class="meta-val">70% Infill</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Print Qty</span>
+                            <span class="meta-val">1 Unit</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="part-card" data-part-id="cornerBottom" id="partCardCornerBottom">
+                    <div class="part-header">
+                        <div class="part-title">Corner Bottom Mount</div>
+                        <div class="part-tag tag-structure">Base</div>
+                    </div>
+                    <div class="part-view-box">
+                        <canvas data-part="cornerBottom"></canvas>
+                    </div>
+                    <div class="part-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Infill %</span>
+                            <span class="meta-val">45% Infill</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Print Qty</span>
+                            <span class="meta-val">2 Units</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="part-card" data-part-id="truck" id="partCardTruck">
+                    <div class="part-header">
+                        <div class="part-title">Linear Carriage Truck</div>
+                        <div class="part-tag tag-motion">Carriage</div>
+                    </div>
+                    <div class="part-view-box">
+                        <canvas data-part="truck"></canvas>
+                    </div>
+                    <div class="part-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Infill %</span>
+                            <span class="meta-val">45% Infill</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Print Qty</span>
+                            <span class="meta-val">2 Units</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="part-card" data-part-id="feet" id="partCardFeet">
+                    <div class="part-header">
+                        <div class="part-title">Workbench Base Feet</div>
+                        <div class="part-tag tag-structure">Base</div>
+                    </div>
+                    <div class="part-view-box">
+                        <canvas data-part="feet"></canvas>
+                    </div>
+                    <div class="part-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Infill %</span>
+                            <span class="meta-val">45% Infill</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Print Qty</span>
+                            <span class="meta-val">4 Units</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="part-card" data-part-id="wireDarryl" id="partCardDarryl">
+                    <div class="part-header">
+                        <div class="part-title">Wire Darryl Spacer</div>
+                        <div class="part-tag tag-tool">Tool</div>
+                    </div>
+                    <div class="part-view-box">
+                        <canvas data-part="wireDarryl"></canvas>
+                    </div>
+                    <div class="part-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Infill %</span>
+                            <span class="meta-val">45% Infill</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Print Qty</span>
+                            <span class="meta-val">2 Units</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="part-card" data-part-id="nutTrap" id="partCardNutTrap">
+                    <div class="part-header">
+                        <div class="part-title">Z Leadscrew Nut Trap</div>
+                        <div class="part-tag tag-motion">Carriage</div>
+                    </div>
+                    <div class="part-view-box">
+                        <canvas data-part="nutTrap"></canvas>
+                    </div>
+                    <div class="part-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Infill %</span>
+                            <span class="meta-val">45% Infill</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Print Qty</span>
+                            <span class="meta-val">1 Unit</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Interactive Assembly Assistant -->
+        <section id="assembly" style="scroll-margin-top: 100px; margin-bottom: 5rem;">
+            <div class="section-header">
+                <h2>Step-by-Step Assembly Assistant</h2>
+            </div>
+            <p class="section-subtitle">Click through the structural phases below. Keep track of your assembly build progress by checking off tasks in the interactive checklist widget.</p>
+            
+            <div class="glass-card assembly-layout" id="assemblyLayoutCard">
+                <!-- Navigation -->
+                <div class="assembly-steps-nav" id="assemblyNavContainer">
+                    <button class="assembly-nav-item active" id="btnAssStep1">
+                        <div class="step-num">1</div>
+                        <div class="step-title-nav">Base & Leg Setup</div>
+                    </button>
+                    <button class="assembly-nav-item" id="btnAssStep2">
+                        <div class="step-num">2</div>
+                        <div class="step-title-nav">Trucks & Squaring</div>
+                    </button>
+                    <button class="assembly-nav-item" id="btnAssStep3">
+                        <div class="step-num">3</div>
+                        <div class="step-title-nav">Pulleys & Stepper Motors</div>
+                    </button>
+                    <button class="assembly-nav-item" id="btnAssStep4">
+                        <div class="step-num">4</div>
+                        <div class="step-title-nav">Gantry & Corner Tops</div>
+                    </button>
+                    <button class="assembly-nav-item" id="btnAssStep5">
+                        <div class="step-num">5</div>
+                        <div class="step-title-nav">Laser Module & Wiring</div>
+                    </button>
+                </div>
+                
+                <!-- Content Panes -->
+                <div class="assembly-content" id="assemblyContentContainer">
+                    
+                    <!-- Step 1 -->
+                    <div class="assembly-pane active" id="paneStep1">
+                        <div class="pane-header">
+                            <h3>Phase 1: Base & Leg Frame Setup</h3>
+                            <span class="difficulty-badge diff-easy">Easy</span>
+                        </div>
+                        <div class="pane-instruction-card">
+                            <ol class="instruction-list">
+                                <li>Screw the four 3D-printed <strong>Feet</strong> to the workbench surface.</li>
+                                <li>Insert vertical steel pipe legs into the feet and lock them with <strong>Corner Leg Locks</strong>.</li>
+                                <li>Slide the <strong>Corner Bottoms</strong> onto the leg pipe tops.</li>
+                                <li>Diagonally measure corner-to-corner with a tape measure. Adjust corner feet until diagonals are within <strong>1mm</strong> of each other.</li>
+                            </ol>
+                        </div>
+                        <div class="checklist-container">
+                            <h5>🔧 Phase 1 Progress Checklist</h5>
+                            <label class="checklist-item"><input type="checkbox"> <span>Mount 4 feet securely to baseboard table</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Install leg pipes and Corner Leg Locks</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Fit Corner Bottom printed models</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Measure diagonals to ensure <1mm square tolerance</span></label>
+                        </div>
+                        <div class="gfm-alert gfm-alert-tip">
+                            <strong>💡 Leveling Tip:</strong> Do not fully tighten leg-lock clamping screws initially. Ensure all four corner bases sit at a level plane relative to the table surface first!
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="assembly-pane" id="paneStep2">
+                        <div class="pane-header">
+                            <h3>Phase 2: Carriage Trucks & Rail Squaring</h3>
+                            <span class="difficulty-badge diff-medium">Medium</span>
+                        </div>
+                        <div class="pane-instruction-card">
+                            <ol class="instruction-list">
+                                <li>Press-fit the 608RS ball bearings into the <strong>Trucks</strong> using M8x40mm bolts.</li>
+                                <li>Snug the locknuts up gently (about 7 in/lbs of torque).</li>
+                                <li>Perform the <strong>Tilt Test:</strong> Tip the outer frame pipe at a 45-degree angle. The Trucks should slide slowly and smoothly from end to end without jamming.</li>
+                            </ol>
+                        </div>
+                        <div class="checklist-container">
+                            <h5>🔧 Phase 2 Progress Checklist</h5>
+                            <label class="checklist-item"><input type="checkbox"> <span>Press-fit all 608RS bearings to Truck frames</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Secure bearings using M8 bolts & nylon locknuts</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Conduct 45-degree angle slide tilt test</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Pre-thread Truck Clamps to capture nuts</span></label>
+                        </div>
+                        <div class="gfm-alert gfm-alert-warning">
+                            <strong>⚠️ Caution:</strong> Using heavy socket wrenches can easily crush the 3D-printed parts. Tighten until the bolt heads make contact, then add only 1/4 of a turn.
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="assembly-pane" id="paneStep3">
+                        <div class="pane-header">
+                            <h3>Phase 3: GT2 Pulleys & Stepper Motors</h3>
+                            <span class="difficulty-badge diff-medium">Medium</span>
+                        </div>
+                        <div class="pane-instruction-card">
+                            <ol class="instruction-list">
+                                <li>Mount the 4 NEMA 17 stepper motors onto the carriage trucks using M3x10mm screws.</li>
+                                <li>Position the GT2 Pulleys onto the motor shafts.</li>
+                                <li>Use the <strong>Wire Darryl</strong> printed spacer under the pulley to set the height relative to the idlers perfectly.</li>
+                                <li>Add a drop of threadlocker (Loctite) and tighten the grub screw directly against the flat of the motor shaft.</li>
+                            </ol>
+                        </div>
+                        <div class="checklist-container">
+                            <h5>🔧 Phase 3 Progress Checklist</h5>
+                            <label class="checklist-item"><input type="checkbox"> <span>Mount NEMA 17 steppers onto active Truck blocks</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Use 'Wire Darryl' spacer to gauge pulley height</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Tighten pulley grub screws on motor flats</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Mount idle GT2 bearing pulleys to passive paths</span></label>
+                        </div>
+                        <div class="gfm-alert gfm-alert-tip">
+                            <strong>💡 Maintenance Tip:</strong> Loose pulleys are the number one cause of skipped steps and erratic alignment errors on custom CNC builds. Always use threadlocker on grub screws!
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="assembly-pane" id="paneStep4">
+                        <div class="pane-header">
+                            <h3>Phase 4: Gantry & Corner Tops</h3>
+                            <span class="difficulty-badge diff-hard">Hard</span>
+                        </div>
+                        <div class="pane-instruction-card">
+                            <ol class="instruction-list">
+                                <li>Slip the center <strong>Core Carriage</strong> block onto the intersecting X and Y axis gantry pipes.</li>
+                                <li>Assemble X and Y axis tubes into the corner bases.</li>
+                                <li>Slide the <strong>Corner Tops</strong> over the pipes and secure them using M5 screws.</li>
+                                <li>Tension X and Y gantry timing belts, anchoring them securely into the upper and lower belt mounts.</li>
+                            </ol>
+                        </div>
+                        <div class="checklist-container">
+                            <h5>🔧 Phase 4 Progress Checklist</h5>
+                            <label class="checklist-item"><input type="checkbox"> <span>Place center Core Carriage on main gantry pipes</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Secure the outer framework with Corner Tops</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Route GT2 belts through idle pulleys</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Tension belts and anchor into printed mounts</span></label>
+                        </div>
+                        <div class="gfm-alert gfm-alert-note">
+                            <strong>📌 Note:</strong> Verify that the gantry belts slide with an even, springy tension. Do not over-tension as this will stress the motor shafts and cause binding.
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="assembly-pane" id="paneStep5">
+                        <div class="pane-header">
+                            <h3>Phase 5: Laser Module, Board & Wiring</h3>
+                            <span class="difficulty-badge diff-hard">Hard</span>
+                        </div>
+                        <div class="pane-instruction-card">
+                            <ol class="instruction-list">
+                                <li>Mount the 5.5W Diode Laser Module onto the Z-axis <strong>Upper Tool Plate</strong>.</li>
+                                <li>Mount your Arduino UNO and CNC Shield inside an enclosure.</li>
+                                <li>Wire the stepper motors (dual X, dual Y) to driver outputs, ensuring matching polarity.</li>
+                                <li>Connect the laser TTL/PWM control pin to the standard spin-enable pin on the CNC Shield.</li>
+                                <li>Power on the SMPS and flash the Arduino with **GRBL v1.1**.</li>
+                            </ol>
+                        </div>
+                        <div class="checklist-container">
+                            <h5>🔧 Phase 5 Progress Checklist</h5>
+                            <label class="checklist-item"><input type="checkbox"> <span>Mount 5.5W laser module onto tool plate carriage</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Install Arduino UNO and CNC Shield</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Wire all 4 stepper motors with correct polarity</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Connect 12V 5A SMPS power supply</span></label>
+                            <label class="checklist-item"><input type="checkbox"> <span>Flash GRBL v1.1 firmware and verify connection</span></label>
+                        </div>
+                        <div class="gfm-alert gfm-alert-warning">
+                            <strong>⚡ Safety First:</strong> Laser modules produce intense radiation. Always wear certified safety goggles before testing the laser, and ensure proper forced air ventilation is running!
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Visual Part Information Popup Modal -->
+    <div class="modal-overlay" id="partModal">
+        <div class="modal-content" id="modalContainer">
+            <div class="modal-header">
+                <h3 id="modalPartName">Part Name</h3>
+                <button class="close-modal-btn" id="closeModal" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body" id="modalBodyContainer">
+                <div class="modal-row">
+                    <div class="modal-canvas-container" id="modalCanvasBox">
+                        <canvas id="modalPartCanvas"></canvas>
+                    </div>
+                    <div class="modal-info" id="modalInfoBox">
+                        <div class="info-section">
+                            <h5>📋 Recommended Print Specs</h5>
+                            <ul>
+                                <li><span>Required Infill</span> <span class="highlight" id="modalInfill">45% Infill</span></li>
+                                <li><span>Units to Print</span> <span class="highlight" id="modalQty">2 Units</span></li>
+                                <li><span>Color Class</span> <span class="highlight" id="modalColor">Class A (Primary)</span></li>
+                                <li><span>Material Weight</span> <span class="highlight" id="modalMaterial">PLA (150g)</span></li>
+                            </ul>
+                        </div>
+                        <div class="info-section">
+                            <h5>🔩 Required Hardware Fasteners</h5>
+                            <ul id="modalHardware">
+                                <li><span>5x M8x40mm Bolts</span></li>
+                                <li><span>10x 608RS Bearings</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="modalDescBlock">
+                    <p id="modalDesc" style="font-size: 0.95rem; line-height: 1.5; color: var(--text-muted);"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <a href="#" class="footer-logo">
+            <span style="font-size: 1.5rem;">⚡</span>
+            <span style="font-family: var(--font-heading); font-weight: 700; color: #fff;">CNC Laser Engraver Project</span>
+        </a>
+        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Mechatronics Capstone Assembly Assistant & G-Code Simulator Dashboard.</p>
+        <p style="font-size: 0.8rem; margin-top: 1.5rem; color: var(--text-dim);">Built with custom HTML, CSS, and modern interactive JavaScript. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
